@@ -16,7 +16,7 @@ in port lrclk = XS1_PORT_1F;            // J7 pin 1 = LRCLK from WM8804     Word
 in buffered port:32 dinA = XS1_PORT_1G; // J7 pin 3 = DOUT from WM8804      Ultranet Channels 1 .. 8 data
 in buffered port:32 dinB = XS1_PORT_1E; // J7 pin 4 = DOUT_9_16 from WM8804 Ultranet Channels 9 .. 16 data
 
-out port scopetrig = XS1_PORT_1J;       // Debug scope trigger on J7 pin 10
+// out port scopetrig = XS1_PORT_1J;       // Debug scope trigger on J7 pin 10
 
 enum i2s_state { search_lr_sync, search_multiframe_sync, check_second_multiframe_sync, in_sync };
 #define FRAME_SIZE 0x180
@@ -165,8 +165,11 @@ uint32_t frame_err_ctr = 0;
 uint32_t frame_good_ctr = 0;
 uint32_t err_led_on = 0;
 
+const uint32_t err_led_on_time = 2*(48000/(FRAME_SIZE/8));
+
 void status_leds(enum status s) {
     uint32_t err_bit;
+
     switch(s) {
     case good:
         frame_good_ctr++;
@@ -174,8 +177,8 @@ void status_leds(enum status s) {
 
     case frame_error:
         frame_err_ctr++;
-        err_led_on = 2000; // Light the Error LED through the next n seconds/frames
-        // printf("Frame errors: %d, good frames: %d\n", frame_err_ctr, frame_good_ctr);
+        err_led_on = err_led_on_time;       // Light the Error LED through the next n seconds/frames
+        //printf("Frame errors: %d, good frames: %d\n", frame_err_ctr, frame_good_ctr);
         break;
     }
     if(err_led_on) {
